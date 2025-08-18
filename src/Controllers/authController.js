@@ -26,7 +26,7 @@ const registrationController = async (req, res) => {
 
     const hashPassword = await bcrypt.hashSync(password, saltRounds);
     const OTP = generateOTP()
-     const otpDigits = OTP.split("");
+     const otpDigits = OTP.split("")
 
     //  -------------- database save data ------------
     await new authModel({
@@ -50,13 +50,43 @@ const registrationController = async (req, res) => {
 // ---------- Otp verification -----------------
  
 const otpVerification = async (req,res)=>{
+
     const {otp} = req.body
     const exsitOtp = await authModel.findOne({otp})
     if(!exsitOtp) return res.status(406).send('Otp invalide')
     if(exsitOtp.otpExpaireTime < Date.now()) return res.status(408).send('OTP Expaired')
 
+        exsitOtp.isVerified = true
+        exsitOtp.otp = null
+        exsitOtp.otpExpaireTime = null
+        exsitOtp.save()
         res.status(200).send(exsitOtp)
 }
 
+// ---------- Resend Otp -----------------
+const reSendOtp = async (req, res)=> {
+    const {email} = req.body
+    const exsitUser = await authModel.findOne({email})
+    if(!exsitUser) return res.status(404).send('User not found')
+    
+    let otp = generateOTP()
+    const otpDigits = String(otp).split("")
 
-module.exports = { registrationController , otpVerification}
+     exsitUser.isVerified = false
+        exsitUser.otp = otp
+        exsitUser.otpExpaireTime = getExpiryTime()
+        exsitUser.save()
+        .then(()=>{
+                otpGenarator(email, exsitUser.userName,  OtpRegistrationTemplats( otpDigits))
+        })
+
+                         res.send(exsitUser)
+
+
+
+}
+
+
+
+
+module.exports = { registrationController , otpVerification, reSendOtp}
