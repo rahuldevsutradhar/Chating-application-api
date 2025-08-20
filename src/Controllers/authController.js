@@ -80,13 +80,25 @@ const reSendOtp = async (req, res)=> {
                 otpGenarator(email, exsitUser.userName,  OtpRegistrationTemplats( otpDigits))
         })
 
-                         res.send(exsitUser)
+         res.status(200).send(exsitUser)
+}
 
+// ---------- Login -----------------
+const loginController =async (req, res)=>{
+    
+    const {email , password}= req.body
+    if (!email || !password ) return res.status(404).send('user Invalid')
+    if (!emailRegex.test(email) || !passwordRegex.test(password)) return res.status(401).send('email or password invalid')
 
+    const exsitUser = await authModel.findOne({email})
+      if(!exsitUser) return res.status(404).send('Email invalid please register')
+        if(exsitUser.isVerified === false) return res.status(401).send('email is not verified')
 
+        const match = await bcrypt.compare(password, exsitUser.password)
+           if(!match) return  res.status(406).send('Wrong password') 
+
+    res.status(200).send('Login succesfull')
 }
 
 
-
-
-module.exports = { registrationController , otpVerification, reSendOtp}
+module.exports = { registrationController , otpVerification, reSendOtp, loginController}
