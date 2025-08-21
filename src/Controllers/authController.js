@@ -5,6 +5,7 @@ const authModel = require('../Models/authModel');
 const { generateOTP, getExpiryTime } = require('../helpers/allGenarator');
 const otpGenarator = require('../helpers/otpGenarator');
 const { OtpRegistrationTemplats } = require('../helpers/htmlTemplats');
+const jwt = require('jsonwebtoken');
 
 // ---------- registration -----------------
 const registrationController = async (req, res) => {
@@ -111,6 +112,8 @@ const loginController =async (req, res)=>{
         const match = await bcrypt.compare(password, exsitUser.password)
            if(!match) return  res.status(406).send('Wrong password') 
 
+            var jwtToken = jwt.sign({ email : exsitUser.email }, process.env.jwt_seccret , {expiresIn : '2h'});
+
             const userInfo  = {
 
                 "UserId" : exsitUser.id ,
@@ -123,7 +126,7 @@ const loginController =async (req, res)=>{
                 
             }
 
-    res.status(200).send( userInfo )
+    res.status(200).send( {userData: userInfo , accessToken : jwtToken} )
 }
 
 
