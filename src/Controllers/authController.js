@@ -29,7 +29,7 @@ const registrationController = async (req, res) => {
      const otpDigits = OTP.split("")
 
     //  -------------- database save data ------------
-    await new authModel({
+    const saveUser = await new authModel({
         userName: userName.trim(),
         email,
         phone,
@@ -38,12 +38,26 @@ const registrationController = async (req, res) => {
         avater,
         otp: OTP,
         otpExpaireTime: getExpiryTime(),
-    }).save()
-        .then(() => {        
+    })
+   await saveUser.save()
+        .then(() => {   
+            
+            const userInfo  = {
+
+                "UserId" : saveUser.id ,
+                "UserName" : saveUser.userName ,
+                "email" : saveUser.email ,
+                "phone" : saveUser.phone ,
+                "password" : saveUser.password ,
+                "gender" : saveUser.gender ,
+                "avater" : saveUser.avater 
+                
+            }
             otpGenarator(email, OtpRegistrationTemplats(otpDigits) )
+
+            res.status(201).send({userInfo : userInfo})
         })
 
-         res.status(201).send('Registration succesfull and otp send in email')
 
 }
 
@@ -97,7 +111,19 @@ const loginController =async (req, res)=>{
         const match = await bcrypt.compare(password, exsitUser.password)
            if(!match) return  res.status(406).send('Wrong password') 
 
-    res.status(200).send('Login succesfull')
+            const userInfo  = {
+
+                "UserId" : exsitUser.id ,
+                "UserName" : exsitUser.userName ,
+                "email" : exsitUser.email ,
+                "phone" : exsitUser.phone ,
+                "password" : exsitUser.password ,
+                "gender" : exsitUser.gender ,
+                "avater" : exsitUser.avater 
+                
+            }
+
+    res.status(200).send( userInfo )
 }
 
 
