@@ -129,5 +129,10 @@ const loginController =async (req, res)=>{
     res.status(200).send( {userData: userInfo , accessToken : jwtToken} )
 }
 
+// ---------- Update Profile -----------------
+const updateProfileController = (req, res)=>{
+    res.send('this is update profile')
+}
 
-module.exports = { registrationController , otpVerification, reSendOtp, loginController}
+
+module.exports = { registrationController , otpVerification, reSendOtp, loginController, updateProfileController }
