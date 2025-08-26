@@ -6,6 +6,16 @@ const { generateOTP, getExpiryTime } = require('../helpers/allGenarator');
 const otpGenarator = require('../helpers/otpGenarator');
 const { OtpRegistrationTemplats } = require('../helpers/htmlTemplats');
 const jwt = require('jsonwebtoken');
+const cloudinary = require('cloudinary').v2
+const fs = require('fs')
+
+ // Configuration
+    cloudinary.config({ 
+        cloud_name: 'dlptuisf0', 
+        api_key: '892345585254425', 
+        api_secret: 'jzhvFNAs0gGnZSCmArgSygtADG8' // Click 'View API Keys' above to copy your API secret
+    });
+    
 
 // ---------- registration -----------------
 const registrationController = async (req, res) => {
@@ -130,9 +140,43 @@ const loginController =async (req, res)=>{
 }
 
 // ---------- Update Profile -----------------
-const updateProfileController = (req, res)=>{
-    res.send('this is update profile')
-}
+const updateProfileController = async (req, res) => {
+    try {
+        const { currentId, userName, email, phone, gender } = req.body;
+
+        const exsitUser = await authModel.findOne({ _id: currentId });
+        if (!exsitUser) {
+            return res.status(404).send('User not found');
+        }
+
+        if (req.file) {
+            const uploadResult = await cloudinary.uploader.upload(req.file.path, {
+                public_id: Date.now(),
+            });
+            exsitUser.avater = uploadResult?.url;
+        }
+         fs.unlink(req.file.path, (err) => {
+        if (err) {
+            console.error('Error deleting local file:', err);
+        } else {
+            console.log('Local file deleted successfully');
+        }
+    })
+
+        exsitUser.userName = userName || exsitUser.userName;
+        exsitUser.phone = phone || exsitUser.phone;
+        exsitUser.gender = gender || exsitUser.gender;
+        // exsitUser.email = email || exsitUser.email;
+
+        await exsitUser.save();
+
+        return res.send(exsitUser);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).send('Server error');
+    }
+};
+
 
 
 module.exports = { registrationController , otpVerification, reSendOtp, loginController, updateProfileController }
