@@ -33,7 +33,7 @@ const OtpRegistrationTemplats =  (otpDigits)=>{
                           </tr>
                         </table>
 
-                        <a href="https://example.com/verify" style="background:#f59e0b; border-radius:999px; padding:12px 26px; display:inline-block; font-weight:700; font-size:16px; color:#ffffff; text-decoration:none;">Verify Email</a>
+                        <a href="http://localhost:5173/otp" style="background:#f59e0b; border-radius:999px; padding:12px 26px; display:inline-block; font-weight:700; font-size:16px; color:#ffffff; text-decoration:none;">Verify Email</a>
 
                         <p style="font-size:13px;color:#6b7280;margin-top:20px;">Didn't get the code? <a href="https://example.com/resend" style="color:#2563eb;">Resend</a></p>
                       </td>
